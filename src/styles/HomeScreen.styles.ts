@@ -138,13 +138,20 @@ export const homeScreenStyles = StyleSheet.create({
     textAlign: 'center',
   },
   getInfoButton: {
-    paddingVertical: 14,
-    borderRadius: 16,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#46B876',
+    paddingVertical: 14,
+    borderRadius: 16,
     marginTop: 36,
     marginHorizontal: 36,
+  },
+  getInfoButtonDisabled: {
+    backgroundColor: '#E5E5E5',
+  },
+  getInfoButtonEnabled: {
+    backgroundColor: '#46B876',
   },
   getInfoButtonText: {
     fontFamily: 'PretendardMedium',
@@ -153,11 +160,30 @@ export const homeScreenStyles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  getInfoButtonDisabled: {
-    backgroundColor: '#EFEFEF',
-  },
   getInfoButtonTextDisabled: {
-    color: '#888888',
+    color: '#8e8e8e',
+  },
+  getInfoButtonTextEnabled: {
+    color: '#FFFFFF',
+  },
+  voiceButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#46B876',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 12,
+    marginHorizontal: 16,
+  },
+  voiceButtonRecording: {
+    backgroundColor: '#ff4444',
+  },
+  voiceButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    marginLeft: 8,
   },
   videoUploadButton: {
     flex: 1,
@@ -512,5 +538,11 @@ export const homeScreenStyles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#46B876',
     borderRadius: 18,
+  },
+  recordingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
   },
 });
