@@ -192,15 +192,6 @@ export const homeScreenStyles = StyleSheet.create({
     height: '70%',
     borderRadius: 16,
   },
-  deleteButton: {
-    position: 'absolute',
-    top: 5,
-    right: 5,
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    borderRadius: 16,
-    padding: 5,
-    zIndex: 10,
-  },
   modalCloseButton: {
     position: 'absolute',
     top: Platform.OS === 'ios' ? 50 : 20,
@@ -494,5 +485,33 @@ export const homeScreenStyles = StyleSheet.create({
   },
   taskSuggestionsList: {
     marginTop: 8,
+  },
+  imageButtonsContainer: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    flexDirection: 'column',
+    gap: 8,
+    zIndex: 10,
+  },
+  deleteButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  magnifyButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectedImageBorder: {
+    borderWidth: 3,
+    borderColor: '#46B876',
   },
 });

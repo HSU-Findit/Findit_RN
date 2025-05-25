@@ -419,6 +419,19 @@ const HomeScreen = () => {
         setOcrResults(prevResults => ({ ...prevResults, [imageUri]: ocrResult }));
         const detectedType = detectImageType(ocrResult.fullText);
         setImageTypes(prev => ({ ...prev, [imageUri]: detectedType }));
+
+        // OCR 결과로 task 제안 생성
+        const suggestions = await suggestTasksFromOcr(ocrResult.fullText);
+        if (suggestions && suggestions.length > 0) {
+          // 각 이미지별로 task 제안 저장
+          setImageTaskSuggestions(prev => ({
+            ...prev,
+            [imageUri]: {
+              suggestions,
+              imageType: detectedType
+            }
+          }));
+        }
       } else {
         setOcrResults(prevResults => ({ ...prevResults, [imageUri]: null }));
         setImageTypes(prev => ({ ...prev, [imageUri]: 'OTHER' }));
@@ -428,6 +441,7 @@ const HomeScreen = () => {
       setOcrResults(prevResults => ({ ...prevResults, [imageUri]: null }));
       setImageTypes(prev => ({ ...prev, [imageUri]: 'OTHER' }));
     } finally {
+      // 작업 제안이 완료된 후에 로딩 상태 해제
       setIsLoadingOcr(prev => ({ ...prev, [imageUri]: false }));
     }
   };
@@ -463,6 +477,18 @@ const HomeScreen = () => {
         setOcrResults(prevResults => ({ ...prevResults, [videoUri]: ocrResult }));
         const detectedType = detectImageType(combinedText);
         setImageTypes(prev => ({ ...prev, [videoUri]: detectedType }));
+
+        // OCR 결과로 task 제안 생성
+        const suggestions = await suggestTasksFromOcr(combinedText);
+        if (suggestions && suggestions.length > 0) {
+          setImageTaskSuggestions(prev => ({
+            ...prev,
+            [videoUri]: {
+              suggestions,
+              imageType: detectedType
+            }
+          }));
+        }
       } else {
         setOcrResults(prevResults => ({ ...prevResults, [videoUri]: null }));
         setImageTypes(prev => ({ ...prev, [videoUri]: 'OTHER' }));
@@ -472,6 +498,7 @@ const HomeScreen = () => {
       setOcrResults(prevResults => ({ ...prevResults, [videoUri]: null }));
       setImageTypes(prev => ({ ...prev, [videoUri]: 'OTHER' }));
     } finally {
+      // 작업 제안이 완료된 후에 로딩 상태 해제
       setIsLoadingOcr(prev => ({ ...prev, [videoUri]: false }));
     }
   };
@@ -572,82 +599,6 @@ const HomeScreen = () => {
               await processVideoWithOCR(asset.uri);
             } else {
               await processImageWithOCR(asset.uri);
-              // 이미지 분석 결과 로깅
-              const analysisResult = await analyzeImage(asset.uri);
-              if (analysisResult) {
-                console.log('\n=== 이미지 분석 결과 ===');
-                console.log('파일:', asset.uri);
-                
-                if (analysisResult.text) {
-                  console.log('\n[텍스트 분석 결과]');
-                  console.log(analysisResult.text);
-                  
-                  // OCR 결과로 task 제안 생성
-                  const suggestions = await suggestTasksFromOcr(analysisResult.text);
-                  if (suggestions && suggestions.length > 0) {
-                    // 각 이미지별로 task 제안 저장
-                    setImageTaskSuggestions(prev => ({
-                      ...prev,
-                      [asset.uri]: {
-                        suggestions,
-                        imageType: imageTypes[asset.uri] || 'OTHER'
-                      }
-                    }));
-                    
-                    // 첫 번째 이미지인 경우 자동으로 선택
-                    if (!selectedImageUri) {
-                      setSelectedImageUri(asset.uri);
-                    }
-                  }
-                }
-
-                if (analysisResult.objects.length > 0) {
-                  console.log('\n[감지된 물체]');
-                  for (const obj of analysisResult.objects) {
-                    const vertices = obj.boundingBox;
-                    const minX = Math.min(...vertices.map(v => v.x));
-                    const minY = Math.min(...vertices.map(v => v.y));
-                    const maxX = Math.max(...vertices.map(v => v.x));
-                    const maxY = Math.max(...vertices.map(v => v.y));
-                    
-                    // 위치 정보를 이미지 크기에 대한 상대적 비율로 표시
-                    const position = {
-                      left: Math.round(minX * 100),
-                      top: Math.round(minY * 100),
-                      right: Math.round(maxX * 100),
-                      bottom: Math.round(maxY * 100)
-                    };
-                    
-                    // 영어 단어를 한글로 번역
-                    const koreanTranslations = await translateToKorean(obj.name);
-                    const koreanText = koreanTranslations.length > 0 ? ` (${koreanTranslations.join(', ')})` : '';
-                    
-                    console.log(`- ${obj.name}${koreanText} (신뢰도: ${(obj.confidence * 100).toFixed(1)}%)`);
-                    console.log(`  위치: 왼쪽 ${position.left}%, 위 ${position.top}%, 오른쪽 ${position.right}%, 아래 ${position.bottom}%`);
-                  }
-                }
-
-                if (analysisResult.labels.length > 0) {
-                  console.log('\n[이미지 라벨]');
-                  analysisResult.labels.forEach(label => {
-                    console.log(`- ${label.description} (신뢰도: ${(label.confidence * 100).toFixed(1)}%)`);
-                  });
-                }
-
-                if (analysisResult.faces.length > 0) {
-                  console.log('\n[얼굴 감지 결과]');
-                  analysisResult.faces.forEach((face, index) => {
-                    console.log(`얼굴 ${index + 1}:`);
-                    if (face.joyLikelihood !== 'UNLIKELY') console.log(`- 기쁨: ${face.joyLikelihood}`);
-                    if (face.sorrowLikelihood !== 'UNLIKELY') console.log(`- 슬픔: ${face.sorrowLikelihood}`);
-                    if (face.angerLikelihood !== 'UNLIKELY') console.log(`- 분노: ${face.angerLikelihood}`);
-                    if (face.surpriseLikelihood !== 'UNLIKELY') console.log(`- 놀람: ${face.surpriseLikelihood}`);
-                    if (face.headwearLikelihood !== 'UNLIKELY') console.log(`- 모자 착용: ${face.headwearLikelihood}`);
-                  });
-                }
-
-                console.log('\n=====================\n');
-              }
             }
           }
         }
@@ -708,70 +659,6 @@ const HomeScreen = () => {
 
         if (newImage.uri) {
           await processImageWithOCR(newImage.uri);
-          // 이미지 분석 결과 로깅
-          const analysisResult = await analyzeImage(newImage.uri);
-          if (analysisResult) {
-            console.log('\n=== 이미지 분석 결과 ===');
-            console.log('파일:', newImage.uri);
-            
-            if (analysisResult.text) {
-              console.log('\n[텍스트 분석 결과]');
-              console.log(analysisResult.text);
-              
-              // OCR 결과로 task 제안 생성
-              const suggestions = await suggestTasksFromOcr(analysisResult.text);
-              if (suggestions && suggestions.length > 0) {
-                setTaskSuggestions(suggestions);
-              }
-            }
-
-            if (analysisResult.objects.length > 0) {
-              console.log('\n[감지된 물체]');
-              for (const obj of analysisResult.objects) {
-                const vertices = obj.boundingBox;
-                const minX = Math.min(...vertices.map(v => v.x));
-                const minY = Math.min(...vertices.map(v => v.y));
-                const maxX = Math.max(...vertices.map(v => v.x));
-                const maxY = Math.max(...vertices.map(v => v.y));
-                
-                // 위치 정보를 이미지 크기에 대한 상대적 비율로 표시
-                const position = {
-                  left: Math.round(minX * 100),
-                  top: Math.round(minY * 100),
-                  right: Math.round(maxX * 100),
-                  bottom: Math.round(maxY * 100)
-                };
-                
-                // 영어 단어를 한글로 번역
-                const koreanTranslations = await translateToKorean(obj.name);
-                const koreanText = koreanTranslations.length > 0 ? ` (${koreanTranslations.join(', ')})` : '';
-                
-                console.log(`- ${obj.name}${koreanText} (신뢰도: ${(obj.confidence * 100).toFixed(1)}%)`);
-                console.log(`  위치: 왼쪽 ${position.left}%, 위 ${position.top}%, 오른쪽 ${position.right}%, 아래 ${position.bottom}%`);
-              }
-            }
-
-            if (analysisResult.labels.length > 0) {
-              console.log('\n[이미지 라벨]');
-              analysisResult.labels.forEach(label => {
-                console.log(`- ${label.description} (신뢰도: ${(label.confidence * 100).toFixed(1)}%)`);
-              });
-            }
-
-            if (analysisResult.faces.length > 0) {
-              console.log('\n[얼굴 감지 결과]');
-              analysisResult.faces.forEach((face, index) => {
-                console.log(`얼굴 ${index + 1}:`);
-                if (face.joyLikelihood !== 'UNLIKELY') console.log(`- 기쁨: ${face.joyLikelihood}`);
-                if (face.sorrowLikelihood !== 'UNLIKELY') console.log(`- 슬픔: ${face.sorrowLikelihood}`);
-                if (face.angerLikelihood !== 'UNLIKELY') console.log(`- 분노: ${face.angerLikelihood}`);
-                if (face.surpriseLikelihood !== 'UNLIKELY') console.log(`- 놀람: ${face.surpriseLikelihood}`);
-                if (face.headwearLikelihood !== 'UNLIKELY') console.log(`- 모자 착용: ${face.headwearLikelihood}`);
-              });
-            }
-
-            console.log('\n=====================\n');
-          }
         }
       }
     } catch (error) {
@@ -1549,11 +1436,11 @@ const handlePlayResponse = async (responseText: string) => {
                     />
                   ) : (
                     <TouchableOpacity
-                      onPress={() => {
-                        handleMediaPreview(media);
-                        analyzeImage(media.uri);
-                      }}
-                      style={styles.imageTouchable}
+                      onPress={() => setSelectedImageUri(media.uri)}
+                      style={[
+                        styles.imageTouchable,
+                        selectedImageUri === media.uri && styles.selectedImageBorder
+                      ]}
                     >
                       {isLoadingOcr[media.uri] || isAnalyzing ? (
                         <BlurView intensity={90} style={styles.imageThumbnail}>
@@ -1575,12 +1462,20 @@ const handlePlayResponse = async (responseText: string) => {
                       )}
                     </TouchableOpacity>
                   )}
-                  <TouchableOpacity
-                    style={styles.deleteButton}
-                    onPress={() => removeImage(media.uri)}
-                  >
-                    <MaterialIcons name="close" size={20} color="#fff" />
-                  </TouchableOpacity>
+                  <View style={styles.imageButtonsContainer}>
+                    <TouchableOpacity
+                      style={styles.deleteButton}
+                      onPress={() => removeImage(media.uri)}
+                    >
+                      <MaterialIcons name="close" size={20} color="#fff" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.magnifyButton}
+                      onPress={() => handleMediaPreview(media)}
+                    >
+                      <MaterialIcons name="search" size={20} color="#fff" />
+                    </TouchableOpacity>
+                  </View>
                   <View style={{ marginTop: 12 }}>
                     <ImageTypeSelector 
                       uri={media.uri} 
@@ -1624,44 +1519,13 @@ const handlePlayResponse = async (responseText: string) => {
           )}
         </TouchableOpacity>
 
-        {/* Task Suggestions Section */}
-        {Object.keys(imageTaskSuggestions).length > 0 && (
+        {/* Task Suggestions Section - Only show when an image is selected and suggestions exist */}
+        {selectedImageUri && imageTaskSuggestions[selectedImageUri] && (
           <View style={styles.taskSuggestionsContainer}>
-            {/* 이미지 선택을 위한 가로 스크롤 뷰 */}
-            <ScrollView 
-              horizontal 
-              showsHorizontalScrollIndicator={false}
-              style={styles.imageSelectorScroll}
-            >
-              {Object.entries(imageTaskSuggestions).map(([uri, data], idx) => (
-                <TouchableOpacity
-                  key={uri}
-                  style={[
-                    styles.imageSelectorItem,
-                    selectedImageUri === uri && styles.imageSelectorItemSelected
-                  ]}
-                  onPress={() => setSelectedImageUri(uri)}
-                >
-                  <Image 
-                    source={{ uri }} 
-                    style={styles.imageSelectorThumbnail}
-                  />
-                  <Text style={styles.imageTypeText}>
-                    {`${idx + 1}번째`}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </ScrollView>
-
-            {/* 선택된 이미지의 task 제안 목록 표시 */}
-            {selectedImageUri && imageTaskSuggestions[selectedImageUri] && (
-              <View style={styles.taskSuggestionsList}>
-                <TaskSuggestionList
-                  suggestions={imageTaskSuggestions[selectedImageUri].suggestions}
-                  onTaskSelect={handleTaskSelect}
-                />
-              </View>
-            )}
+            <TaskSuggestionList
+              suggestions={imageTaskSuggestions[selectedImageUri].suggestions}
+              onTaskSelect={handleTaskSelect}
+            />
           </View>
         )}
 
