@@ -511,7 +511,8 @@ export const homeScreenStyles = StyleSheet.create({
     alignItems: 'center',
   },
   selectedImageBorder: {
-    borderWidth: 3,
+    borderWidth: 2,
     borderColor: '#46B876',
+    borderRadius: 18,
   },
 });
