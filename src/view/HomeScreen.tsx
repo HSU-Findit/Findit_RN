@@ -1436,7 +1436,7 @@ const handlePlayResponse = async (responseText: string) => {
                     />
                   ) : (
                     <TouchableOpacity
-                      onPress={() => setSelectedImageUri(media.uri)}
+                      onPress={() => setSelectedImageUri(prev => prev === media.uri ? null : media.uri)}
                       style={[
                         styles.imageTouchable,
                         selectedImageUri === media.uri && styles.selectedImageBorder

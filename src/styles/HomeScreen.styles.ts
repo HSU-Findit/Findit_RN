@@ -406,9 +406,8 @@ export const homeScreenStyles = StyleSheet.create({
   taskSuggestionsContainer: {
     marginTop: 20,
     marginHorizontal: 36,
-    padding: 15,
-    backgroundColor: '#f5f5f5',
-    borderRadius: 16,
+    flexDirection: 'column',
+    gap: 8,
   },
   taskSuggestionsTitle: {
     fontSize: 18,
@@ -420,7 +419,6 @@ export const homeScreenStyles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 8,
     padding: 15,
-    marginBottom: 10,
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
