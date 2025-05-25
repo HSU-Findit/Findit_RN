@@ -68,7 +68,6 @@ export const speechToText = async (audioUri: string): Promise<string | null> => 
       data.results[0].alternatives.length > 0
     ) {
       const transcript = data.results[0].alternatives[0].transcript;
-      console.log('변환된 텍스트:', transcript);
       return transcript;
     } else {
       console.warn('인식된 텍스트가 없습니다.');
@@ -135,8 +134,6 @@ export const cleanMarkdownForSpeech = (markdownText: string): string => {
 // TTS(Text-to-Speech) API 호출
 export const textToSpeech = async (text: string): Promise<string | null> => {
   try {
-    console.log('TTS 처리 시작:', text);
-    
     // 마크다운 특수 문자를 제거하고 순수 텍스트만 추출
     const cleanedText = cleanMarkdownForSpeech(text);
     console.log('정제된 텍스트:', cleanedText);
