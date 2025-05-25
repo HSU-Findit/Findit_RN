@@ -316,6 +316,7 @@ export const homeScreenStyles = StyleSheet.create({
     padding: 15,
     backgroundColor: '#f5f5f5',
     borderRadius: 16,
+    marginBottom: 30,
   },
   answerLoadingBar: {
     height: 16,
