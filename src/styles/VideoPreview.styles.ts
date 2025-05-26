@@ -27,22 +27,7 @@ export const videoPreviewStyles = StyleSheet.create({
     right: 0,
     bottom: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 4,
-  },
-  loadingBar: {
-    width: 4,
-    height: 24,
-    backgroundColor: '#fff',
-    borderRadius: 2,
-  },
+  }
 });

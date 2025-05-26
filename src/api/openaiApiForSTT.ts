@@ -5,6 +5,11 @@ if (!OPENAI_API_KEY) {
   throw new Error('OpenAI API key is not set. Please check your .env file.');
 }
 
+// OpenAI 모델 설정
+// 발표회 당일: 'gpt-4'로 변경
+// 개발/테스트: 'gpt-3.5-turbo' 사용
+const OPENAI_MODEL = 'gpt-3.5-turbo';
+
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
@@ -25,7 +30,7 @@ export const analyzeSpeechText = async (
 
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: OPENAI_MODEL,
       messages: [
         { 
           role: 'system', 
@@ -92,7 +97,7 @@ export const extractIntentFromSpeech = async (
     }
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: OPENAI_MODEL,
       messages: [
         {
           role: "system",
@@ -188,20 +193,31 @@ export const answerQuestionFromSpeech = async (
     const prompt = `${context}질문: ${question}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: OPENAI_MODEL,
       messages: [
         { 
           role: 'system', 
-          content: `당신은 이미지 분석 결과와 음성 질문을 받아 정확하고 간결한 답변을 제공하는 AI 비서입니다.
-답변은 다음 특성을 가져야 합니다:
-1. 간결하고 명확할 것 (대화용으로 적합하게)
-2. 핵심 정보를 우선적으로 전달할 것
-3. 불필요한 설명이나 서론 없이 직접적인 답변을 제공할 것
-4. TTS(Text-to-Speech)로 읽기 적합한 형식일 것
-5. 질문이 모호하거나 정보가 부족할 경우, 합리적인 추측을 제공할 것
-6. 단순한 문장 구조와 구어체를 사용할 것
+          content: `당신은 이미지/영상 분석 결과와 음성 질문을 받아 자연스럽고 친근한 대화체로 답변하는 AI 비서입니다.
 
-가능한 자연스러운 대화 방식으로 응답해주세요.`
+답변 작성 원칙:
+1. 자연스러운 대화체 사용 (예: "이 사진은 ~네요", "이 영상에서는 ~이 보여요")
+2. 간결하고 명확한 설명 제공
+3. 불필요한 서론이나 결론 없이 핵심 내용 전달
+4. TTS로 읽기 적합한 자연스러운 문장 구조 사용
+5. 정보가 부족할 경우, 있는 정보만으로 최대한 유용한 답변 제공
+
+특히 "무슨 사진이야?", "무슨 영상이야?"와 같은 일반적인 질문에 대해:
+- 감지된 물체나 라벨을 자연스럽게 문장으로 구성
+- "이 사진/영상에서는 ~이 보여요"와 같은 형식으로 시작
+- 주요 특징이나 내용을 간단히 설명
+- 텍스트가 있다면 그 내용도 자연스럽게 포함
+
+예시 답변:
+"이 사진에서는 책상 위에 노트북과 커피잔이 놓여있네요. 사무실 환경에서 일하는 모습이 보여요."
+
+"이 영상에서는 사람들이 회의실에서 회의를 하고 있어요. 화면에 '프로젝트 진행 상황'이라는 텍스트가 보이네요."
+
+가능한 자연스럽고 친근한 대화 방식으로 응답해주세요.`
         },
         { role: 'user', content: prompt },
       ],
@@ -241,7 +257,7 @@ export const generateSpeechResponse = async (
       : `사용자 발화:\n${userText}`;
 
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: OPENAI_MODEL,
       messages: [
         { 
           role: 'system', 

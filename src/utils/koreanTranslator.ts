@@ -1,8 +1,18 @@
+import { OPENAI_API_KEY } from '@env';
 import OpenAI from 'openai';
 import { englishToKorean, koreanToEnglish } from '../constants/languageMapping';
 
+if (!OPENAI_API_KEY) {
+  throw new Error('OpenAI API key is not set. Please check your .env file.');
+}
+
+// OpenAI 모델 설정
+// 발표회 당일: 'gpt-4'로 변경
+// 개발/테스트: 'gpt-3.5-turbo' 사용
+const OPENAI_MODEL = 'gpt-3.5-turbo';
+
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: OPENAI_API_KEY,
 });
 
 // 영어 단어를 한글로 번역
@@ -19,7 +29,7 @@ export const translateToKorean = async (english: string): Promise<string[]> => {
     단어: "${english}"`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: OPENAI_MODEL,
       messages: [
         {
           role: "system",
@@ -31,7 +41,7 @@ export const translateToKorean = async (english: string): Promise<string[]> => {
         }
       ],
       temperature: 0.7,
-      max_tokens: 100
+      max_tokens: 500
     });
 
     const result = response.choices[0]?.message?.content;

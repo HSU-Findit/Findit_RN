@@ -5,6 +5,11 @@ if (!OPENAI_API_KEY) {
   throw new Error('OpenAI API key is not set. Please check your .env file.');
 }
 
+// OpenAI 모델 설정
+// 발표회 당일: 'gpt-4'로 변경
+// 개발/테스트: 'gpt-3.5-turbo' 사용
+const OPENAI_MODEL = 'gpt-3.5-turbo';
+
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
 });
@@ -20,7 +25,7 @@ export const getInfoFromTextWithOpenAI = async (text: string | null): Promise<st
   }
   try {
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: OPENAI_MODEL,
       messages: [
         { 
           role: 'system', 
@@ -122,7 +127,7 @@ export const suggestTasksFromOcr = async (ocrText: string | null): Promise<TaskS
     const timeoutId = setTimeout(() => controller.abort(), 30000);
 
     const response = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: OPENAI_MODEL,
       messages: [
         {
           role: "system",

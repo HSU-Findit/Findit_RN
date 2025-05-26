@@ -30,6 +30,7 @@ import {
 import { speechToText, startRecording, stopRecording, textToSpeech } from '../api/speechApi';
 import { extractTextFromVideo } from '../api/videoOcrApi';
 import ImageTypeSelector from '../components/ImageTypeSelector';
+import LoadingWave from '../components/LoadingWave';
 import MediaPreviewModal from '../components/MediaPreviewModal';
 import SummarizationSection from '../components/SummarizationSection';
 import TaskSuggestionList from '../components/TaskSuggestionList';
@@ -137,63 +138,6 @@ const logError = (message: string, error?: any) => {
   } else {
     console.error(`❌ ${message}`);
   }
-};
-
-const LoadingWave = () => {
-  const [animations] = useState([
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-    new Animated.Value(0),
-  ]);
-
-  useEffect(() => {
-    const animate = () => {
-      const sequences = animations.map((anim, index) => {
-        return Animated.sequence([
-          Animated.timing(anim, {
-            toValue: 1,
-            duration: 400,
-            delay: index * 100,
-            useNativeDriver: false,
-          }),
-          Animated.timing(anim, {
-            toValue: 0,
-            duration: 400,
-            useNativeDriver: false,
-          }),
-        ]);
-      });
-
-      Animated.stagger(100, sequences).start(() => animate());
-    };
-
-    animate();
-  }, []);
-
-  return (
-    <View style={styles.loadingWaveContainer}>
-      {animations.map((anim, index) => (
-        <Animated.View
-          key={index}
-          style={[
-            styles.loadingBar,
-            {
-              opacity: anim,
-              transform: [
-                {
-                  scaleY: anim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.5, 1],
-                  }),
-                },
-              ],
-            },
-          ]}
-        />
-      ))}
-    </View>
-  );
 };
 
 const AnswerLoadingSkeleton = () => {
@@ -1559,7 +1503,9 @@ const HomeScreen = () => {
                         />
                       )}
                       {(isLoadingOcr[media.uri] || isAnalyzing) && (
-                        <OcrLoadingAnimation />
+                        <View style={styles.loadingOverlayThumb}>
+                          <LoadingWave />
+                        </View>
                       )}
                     </TouchableOpacity>
                   )}

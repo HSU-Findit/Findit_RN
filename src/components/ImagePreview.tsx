@@ -12,6 +12,7 @@ import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 import type { OcrResult } from '../api/googleVisionApi';
 import { englishToKorean, koreanToEnglish } from '../constants/languageMapping';
 import { imagePreviewStyles as styles } from '../styles/ImagePreview.styles';
+import LoadingWave from './LoadingWave';
 
 interface ImageLayout {
   width: number;
@@ -390,6 +391,11 @@ const ImagePreview: React.FC<ImagePreviewProps> = ({
                 </Animated.View>
               </GestureDetector>
             </View>
+            {isLoadingOcr && (
+              <View style={styles.loadingOverlay}>
+                <LoadingWave />
+              </View>
+            )}
           </View>
         )}
       </View>

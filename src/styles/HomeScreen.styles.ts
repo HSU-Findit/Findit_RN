@@ -109,7 +109,7 @@ export const homeScreenStyles = StyleSheet.create({
     bottom: 0,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     borderRadius: 16,
   },
   summarySection: {
@@ -304,10 +304,10 @@ export const homeScreenStyles = StyleSheet.create({
   },
   loadingBar: {
     width: 4,
-    height: 20,
-    backgroundColor: '#FFFFFF',
+    height: 24,
+    backgroundColor: '#fff',
+    borderRadius: 2,
     marginHorizontal: 2,
-    borderRadius: 4,
   },
   // 답변 로딩 스타일
   answerLoadingContainer: {
