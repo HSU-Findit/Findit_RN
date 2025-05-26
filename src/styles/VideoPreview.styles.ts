@@ -4,9 +4,10 @@ export const videoPreviewStyles = StyleSheet.create({
   previewItemContainer: {
     width: 120,
     height: 120,
-    borderRadius: 8,
+    borderRadius: 16,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: '#F5F5F5',
   },
   previewMedia: {
     width: '100%',

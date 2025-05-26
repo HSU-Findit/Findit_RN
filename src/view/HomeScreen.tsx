@@ -557,10 +557,13 @@ const HomeScreen = () => {
           if (currentOcrResult) {
             setIsProcessingAI(true);
             
+            // 선택된 이미지에 대한 분석 결과 가져오기
+            const currentAnalysisResult = await analyzeImage(selectedImageUri);
+            
             const aiResponse = await answerQuestionFromSpeech(
               transcribedText.trim(),
               currentOcrResult.fullText,
-              analysisResult
+              currentAnalysisResult
             );
             
             const ttsUri = await textToSpeech(aiResponse);
@@ -580,8 +583,14 @@ const HomeScreen = () => {
                 }
               });
             }
+          } else {
+            console.log('선택된 이미지에 대한 OCR 결과가 없습니다.');
+            Alert.alert('알림', '선택된 이미지에 대한 분석이 필요합니다. 잠시만 기다려주세요.');
           }
         }
+      } else {
+        console.log('선택된 이미지가 없습니다.');
+        Alert.alert('알림', '이미지를 선택해주세요.');
       }
       
     } catch (error) {
@@ -591,7 +600,7 @@ const HomeScreen = () => {
       setIsProcessingSpeech(false);
       setIsProcessingAI(false);
     }
-  }, [isRecording, cleanupRecording, resetStates, selectedImageUri, selectedImages, ocrResults, analysisResult]);
+  }, [isRecording, cleanupRecording, resetStates, selectedImageUri, selectedImages, ocrResults]);
 
   // 컴포넌트 언마운트 시 정리
   useEffect(() => {
@@ -1513,10 +1522,18 @@ const HomeScreen = () => {
               {selectedImages.map((media) => (
                 <View key={media.assetId || media.uri} style={styles.imageWrapper}>
                   {media.type === 'video' ? (
-                    <VideoPreview
-                      videoUri={media.uri}
-                      onPress={() => handleMediaPreview(media)}
-                    />
+                    <TouchableOpacity
+                      onPress={() => setSelectedImageUri(prev => prev === media.uri ? null : media.uri)}
+                      style={[
+                        styles.imageTouchable,
+                        selectedImageUri === media.uri && styles.selectedImageBorder
+                      ]}
+                    >
+                      <VideoPreview
+                        videoUri={media.uri}
+                        onPress={() => handleMediaPreview(media)}
+                      />
+                    </TouchableOpacity>
                   ) : (
                     <TouchableOpacity
                       onPress={() => setSelectedImageUri(prev => prev === media.uri ? null : media.uri)}

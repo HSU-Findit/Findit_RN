@@ -1,7 +1,6 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import * as VideoThumbnails from 'expo-video-thumbnails';
 import React, { useEffect, useState } from 'react';
-import { Image, TouchableOpacity, View } from 'react-native';
+import { Image, View } from 'react-native';
 import { videoPreviewStyles } from '../styles/VideoPreview.styles';
 
 interface VideoPreviewProps {
@@ -33,13 +32,13 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ videoUri, onPress }) => {
   }, [videoUri]);
 
   const handlePress = () => {
-    if (thumbnailUri && onPress) {
-      onPress(thumbnailUri);
+    if (videoUri && onPress) {
+      onPress(videoUri);
     }
   };
 
   return (
-    <TouchableOpacity onPress={handlePress} style={videoPreviewStyles.previewItemContainer}>
+    <View style={videoPreviewStyles.previewItemContainer}>
       {thumbnailUri ? (
         <Image
           source={{ uri: thumbnailUri }}
@@ -47,10 +46,7 @@ const VideoPreview: React.FC<VideoPreviewProps> = ({ videoUri, onPress }) => {
           resizeMode="cover"
         />
       ) : null}
-      <View style={videoPreviewStyles.playButton}>
-        <MaterialIcons name="play-circle-filled" size={32} color="#fff" />
-      </View>
-    </TouchableOpacity>
+    </View>
   );
 };
 
