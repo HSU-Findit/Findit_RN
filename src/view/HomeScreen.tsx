@@ -1532,6 +1532,7 @@ const HomeScreen = () => {
                       <VideoPreview
                         videoUri={media.uri}
                         onPress={() => handleMediaPreview(media)}
+                        isLoading={isLoadingOcr[media.uri] || isAnalyzing}
                       />
                     </TouchableOpacity>
                   ) : (
