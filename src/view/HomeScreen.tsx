@@ -1577,7 +1577,7 @@ const HomeScreen = () => {
               (!questionText.trim() || !selectedImageUri) && styles.getInfoButtonTextDisabled,
               !questionText.trim() && selectedImageUri && styles.getInfoButtonTextEnabled
             ]}>
-              {!questionText.trim() ? "음성으로 질문하기" : "이미지 정보 가져오기"}
+              {!questionText.trim() ? "음성으로 질문하기" : "텍스트로 질문하기"}
             </Text>
           )}
         </TouchableOpacity>
@@ -1600,9 +1600,11 @@ const HomeScreen = () => {
             <Text style={styles.infoContainerTitle}>이미지 분석 결과</Text>
             <View style={styles.infoResultContainer}>
               <ScrollView style={styles.infoResultScrollView}>
-                <Markdown style={markdownStyles}>
-                  {infoResult}
-                </Markdown>
+                <Text selectable>
+                  <Markdown style={markdownStyles}>
+                    {infoResult}
+                  </Markdown>
+                </Text>
               </ScrollView>
             </View>
           </View>
