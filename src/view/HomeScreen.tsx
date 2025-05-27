@@ -871,12 +871,17 @@ const HomeScreen = () => {
       return;
     }
 
+    if (!selectedImageUri) {
+      Alert.alert('알림', '분석할 이미지를 선택해주세요.');
+      return;
+    }
+
     setIsFetchingInfo(true);
     setInfoResult(null);
 
     try {
-      const selectedMedia = selectedImages[0];
-      if (!selectedMedia.uri) {
+      const selectedMedia = selectedImages.find(img => img.uri === selectedImageUri);
+      if (!selectedMedia?.uri) {
         throw new Error('미디어 URI가 없습니다.');
       }
 
@@ -1552,8 +1557,9 @@ const HomeScreen = () => {
             (!questionText.trim() || !selectedImageUri) && styles.getInfoButtonDisabled,
             !questionText.trim() && selectedImageUri && styles.getInfoButtonEnabled
           ]} 
-          onPressIn={handleStartRecording}
-          onPressOut={handleStopRecording}
+          onPressIn={questionText.trim() ? undefined : handleStartRecording}
+          onPressOut={questionText.trim() ? undefined : handleStopRecording}
+          onPress={questionText.trim() ? handleGetInfo : undefined}
           disabled={isFetchingInfo || isProcessingSpeech || isProcessingAI || !selectedImageUri}
         >
           {isFetchingInfo ? (
