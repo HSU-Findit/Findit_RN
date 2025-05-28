@@ -1,5 +1,6 @@
 import { OPENAI_API_KEY } from '@env';
 import OpenAI from 'openai';
+import { IMAGE_TYPE_PROMPTS, ImageType } from '../constants/ImageTypes';
 
 if (!OPENAI_API_KEY) {
   throw new Error('OpenAI API key is not set. Please check your .env file.');
@@ -19,11 +20,14 @@ const openai = new OpenAI({
  * @param text 요약할 텍스트입니다.
  * @returns 요약된 텍스트 또는 오류 메시지를 반환하는 Promise 객체입니다.
  */
-export const getInfoFromTextWithOpenAI = async (text: string | null): Promise<string> => {
+export const getInfoFromTextWithOpenAI = async (text: string | null, imageType: ImageType = 'OTHER'): Promise<string> => {
   if (!text) {
     return '정보를 추출할 텍스트가 제공되지 않았습니다.';
   }
   try {
+    // 이미지 유형별 프롬프트 가져오기
+    const typeSpecificPrompt = IMAGE_TYPE_PROMPTS[imageType];
+
     const completion = await openai.chat.completions.create({
       model: OPENAI_MODEL,
       messages: [
@@ -31,11 +35,12 @@ export const getInfoFromTextWithOpenAI = async (text: string | null): Promise<st
           role: 'system', 
           content: `당신은 이미지 분석 및 Q&A 어시스턴트입니다. 모든 응답은 마크다운 형식으로 작성하며, 간결하고 명확하게 정보를 전달하세요.
 
+          ${typeSpecificPrompt}
 응답 형식:
 1. **주요 정보 요약** (2-3문장)
 2. **핵심 분석** (불릿 포인트로 간단히)
 3. **추가 정보** (필요한 경우에만)
-
+4. **이미지 타입에 맞는 정보** 
 예시 1 (질문 포함):
 분석 결과: "[텍스트 분석 결과] 회의록: 프로젝트 X 진행 상황 보고
 [감지된 물체] - 노트북 - 사람 - 책상
@@ -134,12 +139,10 @@ export const suggestTasksFromOcr = async (ocrText: string | null): Promise<TaskS
           content: `당신은 텍스트를 분석하여 수행해야 할 작업을 제안하는 어시스턴트입니다.
 다음 규칙을 따라주세요:
 1. 모든 응답은 반드시 한글로 작성해주세요.
-2. 작업 제목은 간단명료하게 작성해주세요.
-3. 작업 설명은 구체적이고 실용적으로 작성해주세요.
+2. 작업 제목은 간단명료하고 반드시 신뢰적으로 작성해주세요.
 4. 반드시 3개 이상의 작업을 제안해주세요.
 5. 각 작업은 다음 형식으로 작성해주세요:
    [우선순위] 작업 제목
-   - 설명: 작업에 대한 상세 설명
 
 6. 우선순위는 다음 기준으로 설정해주세요:
    - [중요]: 즉시 처리해야 하는 중요한 작업 (최소 1개)
@@ -207,44 +210,5 @@ export const suggestTasksFromOcr = async (ocrText: string | null): Promise<TaskS
     }
     
     return [];
-  }
-};
-
-/**
- * 선택된 작업에 대한 상세 정보를 요청합니다.
- * @param task 선택된 작업 정보
- * @param ocrText 원본 OCR 텍스트
- * @returns 작업에 대한 상세 정보
- */
-export const getTaskDetails = async (
-  task: TaskSuggestion,
-  ocrText: string | null
-): Promise<string> => {
-  try {
-    if (!ocrText) {
-      return '원본 텍스트가 없어 상세 정보를 제공할 수 없습니다.';
-    }
-
-    const prompt = `
-      다음은 이미지에서 추출한 텍스트와 선택된 작업입니다.
-      이 작업에 대해 더 자세한 정보를 제공해주세요.
-      
-      선택된 작업:
-      - 제목: ${task.task}
-      - 우선순위: ${task.priority}
-      
-      원본 텍스트:
-      ${ocrText}
-
-      위 정보를 바탕으로 다음 사항들을 포함하여 논리정연하고 간단하게 설명해주세요:
-      1. 이 작업이 왜 중요한지
-      2. 이 작업을 수행하기 위한 구체적인 단계
-      3. 이 작업과 관련된 주의사항이나 팁
-    `;
-
-    return await getInfoFromTextWithOpenAI(prompt);
-  } catch (error) {
-    console.error('Task details error:', error);
-    return '작업 상세 정보를 가져오는 중 오류가 발생했습니다.';
   }
 };
